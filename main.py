@@ -7,13 +7,13 @@ while True:
     ret, frame = cap.read()
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_blue = np.array([4, 0, 141])
-    upper_blue = np.array([160, 243, 248])
+    lower_blue = np.array([50, 30, 50])
+    upper_blue = np.array([130, 250, 255])
     
     mask = cv2.inRange(hsv, lower_blue, upper_blue)
     result = cv2.bitwise_and(frame, frame, mask=mask)
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', result)
     cv2.imshow('mask', mask)
 
     if cv2.waitKey(1) == ord('q'):
