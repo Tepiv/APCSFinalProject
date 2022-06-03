@@ -16,8 +16,19 @@ while True:
     cv2.imshow('frame', result)
     cv2.imshow('mask', mask)
 
+
+    count = 0
+    for i in range(10):
+        for j in range(10):
+            if (result[235+i][315+j] > [0, 0, 0]).all:
+                count+=1 
+
+            
+
     if cv2.waitKey(1) == ord('q'):
         break
+
+print(count)
 
 cap.release()
 cv2.destroyAllWindows()
