@@ -1,7 +1,11 @@
 import numpy as np
 import cv2
+import serial
+import time
 
 cap = cv2.VideoCapture(0)
+ser = serial.Serial('COM3', 9600)
+shooting = False
 
 while True:
     ret, frame = cap.read()
@@ -11,31 +15,37 @@ while True:
     upper_blue = np.array([130, 250, 255])
     
     mask = cv2.inRange(hsv, lower_blue, upper_blue)
-    result = cv2.bitwise_and(frame, frame, mask=mask)
 
-    #cv2.imshow('frame', result)
-    #cv2.imshow('mask', mask)
 
+
+    cv2.imshow('mask', mask)
+
+    key = cv2.waitKey(1)
+    
+    if  key == ord('q'):
+        break
+    elif key == ord(' '):
+        shooting = True
+
+    if (not shooting):
+        continue
     (h, w) = frame.shape[:2]
     
     centerX, centerY = (w // 2), (h // 2)
 
-    
-    topHalf = mask[centerY:h, 0:w]
-    bottomHalf = mask[0:centerY, 0:w]
+    width = 50
+    height = 150
+
     leftHalf = mask[0:h, 0:centerX]
     rightHalf = mask[0:h, centerX:w]
-    middleRadius = 50
-    middle = mask[centerY-middleRadius:centerY+middleRadius,centerX-middleRadius:centerX+middleRadius]
+    middle = mask[centerY-height:centerY+height,centerX-width:centerX+width]
 
-    success = (middleRadius*2)**2*255*0.3    
+    success = (width*height*4)*255*0.1    
 
     
 
     a = np.sum(leftHalf)
     b = np.sum(rightHalf)
-    c = np.sum(topHalf)
-    d = np.sum(bottomHalf)
     e = np.sum(middle)
     
 
@@ -43,27 +53,33 @@ while True:
 
     if e > success:
         #stop
-        print("gaming time")
-    #if  a > b:
+        shooting = False
+        ser.write('S'.encode())
+        time.sleep(2)
+    elif  a > b:
         #move left
-        #print("left")
-    #elif b > a:
+        ser.write('L'.encode())
+        time.sleep(0.5)
+       
+    elif b > a:
         #move right
-        #print("right")
+        ser.write('R'.encode())
+        time.sleep(0.5)
+        
+
+
+        
+
 
     #cv2.imshow('Left Half', leftHalf)
     #cv2.imshow('Right Half', rightHalf)  
-    #cv2.imshow('Top Half', topHalf)
-    #cv2.imshow('Bottom Half', bottomHalf)      
+  
     cv2.imshow('Middle', middle)
 
-    if cv2.waitKey(1) == ord('q'):
-        break
-
-
+    
 
 cap.release()
 cv2.destroyAllWindows()
-
+ser.write(b'Q') 
 
 
